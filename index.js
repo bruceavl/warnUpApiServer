@@ -1,20 +1,23 @@
-var express = require('express');
-var app = express();
+const express = require("express");
 
-var bodyParser = require('body-parser');
-const swaggerUi = require('swagger-ui-express')
-const swaggerFile = require('./swagger_output.json')
+const app = express();
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+const bodyParser = require("body-parser");
+const swaggerUi = require("swagger-ui-express");
+const swaggerFile = require("./swagger_output.json");
 
 app.use(bodyParser.json());
 
-var fruits = require('./services/fruitService.js');
-app.use('/fruits', fruits);
+// eslint-disable-next-line import/extensions
+const fruits = require("./controller/fruitsController.js");
 
-app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
+app.use("/fruits", fruits);
 
-app.get('*', function (req, res) {
-   res.send('Sorry, this is an invalid URL.');
+app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+
+app.get("*", (req, res) => {
+  res.send("Sorry, this is an invalid URL.");
 });
 
 app.listen(3000);
-
