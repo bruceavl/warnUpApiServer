@@ -9,15 +9,19 @@ const swaggerFile = require("./swagger_output.json");
 
 app.use(bodyParser.json());
 
-// eslint-disable-next-line import/extensions
-const fruits = require("./controller/fruitsController.js");
+const fruits = require("./controller/fruitsController");
 
 app.use("/fruits", fruits);
 
-app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+try {
+  app.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
-app.get("*", (req, res) => {
-  res.send("Sorry, this is an invalid URL.");
-});
+  app.get("*", (_req, res) => {
+    res.status(404).send("Sorry, this is an invalid URL.");
+  });
+} catch (error) {
+  // eslint-disable-next-line no-console
+  console.log(error);
+}
 
 app.listen(3000);

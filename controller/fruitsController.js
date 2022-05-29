@@ -3,65 +3,77 @@ const express = require("express");
 const router = express.Router();
 // eslint-disable-next-line import/extensions
 const service = require("../services/fruitService.js");
-
-function calculatePrice(price) {
-  const date = new Date();
-  // Price goes up on Fridays
-  if (date.getDay() === 5) {
-    return price + 5;
-  }
-
-  return price;
-}
+// eslint-disable-next-line import/extensions
+const priceCheck = require("./fruitPriceCheck.js");
 
 // GET - return all records
 router.get("/", async (req, res) => {
-  const fruits = await service.getFruits();
-  return res.json(fruits);
+  try {
+    const fruits = await service.getFruits();
+    return res.json(fruits);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
 });
 
 // GET - return a specific item
 router.get("/:id", async (req, res) => {
-  const f = service.getFruit(req.params.id);
-
-  if (f === null) {
-    return res.status(404).json({ message: "Fruit not found!" });
+  if (!req.body.name
+    || !priceCheck.priceCheck(req.body.price)) {
+    return res.status(400).json({ message: "Bad Request" });
   }
 
-  f.price = calculatePrice(f.price);
+  try {
+    const f = service.getFruit(req.params.id);
 
-  return res.json(f);
+    if (f === null) {
+      return res.status(404).json({ message: "Fruit not found!" });
+    }
+
+    return res.json(f);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
 });
 
 // POST - add a new item
 router.post("/", async (req, res) => {
   // verify inputs
   if (!req.body.name
-    || !req.body.price.toString().match(/^[0-9]{1,}$/g)) {
+    || !priceCheck.priceCheck(req.body.price)) {
     return res.status(400).json({ message: "Bad Request" });
   }
 
-  await service.addFruit(req.body.name, req.body.price);
-
-  return res.json({ message: "New fruit created.", location: "/fruits/" });
+  try {
+    await service.addFruit(req.body.name, req.body.price);
+    return res.json({ message: "New fruit created.", location: "/fruits/" });
+  } catch (err) {
+    return res.status(500).json(err);
+  }
 });
 
 // POST - update an existing item
 router.post("/:id", async (req, res) => {
-  if (!req.body.price.toString().match(/^[0-9]{1,}$/g)) {
+  if (!priceCheck.priceCheck(req.body.price)) {
     return res.status(400).json({ message: "Bad Request" });
   }
 
-  await service.updateFruitPrice(req.params.id, req.body.price);
-
-  return res.json(`Fruit id ${req.params.id} has been updated.`);
+  try {
+    await service.updateFruitPrice(req.params.id, req.body.price);
+    return res.json(`Fruit id ${req.params.id} has been updated.`);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
 });
 
 // DELETE
 router.delete("/:id", async (req, res) => {
-  await service.deleteFruit(req.params.id);
-
-  return res.json({ message: `Fruit id ${req.params.id} has been removed.` });
+  try {
+    await service.deleteFruit(req.params.id);
+    return res.json({ message: `Fruit id ${req.params.id} has been removed.` });
+  } catch (error) {
+    return res.status(500).json(error);
+  }
 });
 
 module.exports = router;
