@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/extensions
-const database = require("../dataAccess/fruitDataAccess.js");
-const formula = require("./fruitFormula.js");
+const database = require("../dataAccess/fruitDataAccess");
+const formula = require("./fruitFormula");
 
 // Get - return all fruits
 async function getFruits() {
@@ -13,25 +13,32 @@ async function getFruits() {
 }
 
 // GET - return a specific item
-function getFruit(id) {
-  const fruit = database.getFruit(id);
-  fruit.price = formula.getPrice(fruit.price);
+async function getFruit(id) {
+  const fruit = await database.getFruit(id);
+
+  if (fruit !== null) {
+    fruit.price = formula.getPrice(fruit.price);
+  }
+
   return fruit;
 }
 
 // POST - add a new item
 async function addFruit(name, price) {
-  await database.addFruit(name, price);
+  const fruit = await database.addFruit(name, price);
+  return fruit;
 }
 
 // POST - update an existing item
 async function updateFruitPrice(id, price) {
-  await database.updateFruitPrice(id, price);
+  const number = await database.updateFruitPrice(id, price);
+  return number;
 }
 
 // DELETE
 async function deleteFruit(id) {
-  await database.deleteFruit(id);
+  const number = await database.deleteFruit(id);
+  return number;
 }
 
 module.exports = {

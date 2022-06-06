@@ -2,9 +2,9 @@ const express = require("express");
 
 const router = express.Router();
 // eslint-disable-next-line import/extensions
-const service = require("../services/fruitService.js");
+const service = require("../services/fruitService");
 // eslint-disable-next-line import/extensions
-const priceCheck = require("./fruitPriceCheck.js");
+const priceCheck = require("./fruitPriceCheck");
 
 // GET - return all records
 router.get("/", async (req, res) => {
@@ -12,19 +12,15 @@ router.get("/", async (req, res) => {
     const fruits = await service.getFruits();
     return res.json(fruits);
   } catch (err) {
+    console.error(err);
     return res.status(500).json(err);
   }
 });
 
 // GET - return a specific item
 router.get("/:id", async (req, res) => {
-  if (!req.body.name
-    || !priceCheck.priceCheck(req.body.price)) {
-    return res.status(400).json({ message: "Bad Request" });
-  }
-
   try {
-    const f = service.getFruit(req.params.id);
+    const f = await service.getFruit(req.params.id);
 
     if (f === null) {
       return res.status(404).json({ message: "Fruit not found!" });
@@ -32,6 +28,7 @@ router.get("/:id", async (req, res) => {
 
     return res.json(f);
   } catch (err) {
+    console.error(err);
     return res.status(500).json(err);
   }
 });
@@ -40,39 +37,52 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   // verify inputs
   if (!req.body.name
-    || !priceCheck.priceCheck(req.body.price)) {
+    || !priceCheck.checkPrice(req.body.price)) {
     return res.status(400).json({ message: "Bad Request" });
   }
 
   try {
-    await service.addFruit(req.body.name, req.body.price);
-    return res.json({ message: "New fruit created.", location: "/fruits/" });
+    const fruit = await service.addFruit(req.body.name, req.body.price);
+    return res.json({ message: "New fruit created.", location: `/fruits/${fruit.id}` });
   } catch (err) {
+    console.error(err);
     return res.status(500).json(err);
   }
 });
 
 // POST - update an existing item
 router.post("/:id", async (req, res) => {
-  if (!priceCheck.priceCheck(req.body.price)) {
-    return res.status(400).json({ message: "Bad Request" });
+  if (!priceCheck.checkPrice(req.body.price)) {
+    return res.status(400).json({ message: "Bad Request. The price of fruit is missing." });
   }
 
   try {
-    await service.updateFruitPrice(req.params.id, req.body.price);
-    return res.json(`Fruit id ${req.params.id} has been updated.`);
-  } catch (error) {
-    return res.status(500).json(error);
+    const result = await service.updateFruitPrice(req.params.id, req.body.price);
+
+    if (result === 1) {
+      return res.json(`Fruit id ${req.params.id} has been updated.`);
+    }
+
+    return res.status(404).json({ message: "Fruit not found!" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
   }
 });
 
 // DELETE
 router.delete("/:id", async (req, res) => {
   try {
-    await service.deleteFruit(req.params.id);
-    return res.json({ message: `Fruit id ${req.params.id} has been removed.` });
-  } catch (error) {
-    return res.status(500).json(error);
+    const result = await service.deleteFruit(req.params.id);
+
+    if (result === 1) {
+      return res.json({ message: `Fruit id ${req.params.id} has been removed.` });
+    }
+
+    return res.status(404).json({ message: "Fruit not found!" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
   }
 });
 

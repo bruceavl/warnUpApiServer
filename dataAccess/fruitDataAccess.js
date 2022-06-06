@@ -1,45 +1,51 @@
 const db = require("../models");
 
-function getFruits() {
-  return db.Fruit.findAll();
+async function getFruits() {
+  const fruits = await db.Fruit.findAll();
+  return fruits;
 }
 
-function getFruit(id) {
-  return db.Fruit.findAll({
-    where: {
-      id,
-    },
-  });
+async function getFruit(id) {
+  const f = await db.Fruit.findByPk(id);
+  return f;
 }
 
 async function addFruit(name, price) {
   const date = new Date();
 
-  await db.Fruit.create({
+  const fruit = await db.Fruit.create({
     name,
     price,
     createdTime: date,
     updatedTime: date,
   });
+
+  return fruit;
 }
 
 async function updateFruitPrice(id, price) {
   const date = new Date();
-  await db.Fruit.update({
-    price,
-    updatedTime: date,
-    where: {
-      id,
+  const record = await db.Fruit.update(
+    {
+      price,
+      updatedTime: date,
     },
-  });
+    {
+      where: { id },
+    },
+  );
+
+  return record[0];
 }
 
 async function deleteFruit(id) {
-  await db.Fruit.destroy({
+  const record = await db.Fruit.destroy({
     where: {
       id,
     },
   });
+
+  return record;
 }
 
 module.exports = {
