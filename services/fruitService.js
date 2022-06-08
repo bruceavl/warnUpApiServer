@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/extensions
-const database = require("../dataAccess/fruitDataAccess");
-const formula = require("./fruitFormula");
+const database = require('../dataAccess/fruitDataAccess');
+const formula = require('./fruitFormula');
 
 // Get - return all fruits
 async function getFruits() {

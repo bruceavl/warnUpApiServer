@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require("sequelize");
+const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   class Fruit extends Model {
@@ -19,7 +19,7 @@ module.exports = (sequelize) => {
   }, {
     timestamps: false,
     sequelize,
-    modelName: "Fruit",
+    modelName: 'Fruit',
   });
 
   const b = async () => { await Fruit.sync(); };

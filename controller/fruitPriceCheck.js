@@ -1,6 +1,6 @@
 const fruitPriceCheck = {
   checkPrice(price) {
-    if (price === undefined || price === null || price === "") {
+    if (price === undefined || price === null || price === '') {
       return false;
     }
 

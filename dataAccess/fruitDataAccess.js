@@ -1,4 +1,4 @@
-const db = require("../models");
+const db = require('../models');
 
 async function getFruits() {
   const fruits = await db.Fruit.findAll();
